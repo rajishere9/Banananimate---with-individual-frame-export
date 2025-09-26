@@ -8,7 +8,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimationAssets } from '../services/geminiService';
 import { Frame } from '../types';
 import BananaLoader from './BananaLoader';
-import { InfoIcon, XCircleIcon, SettingsIcon, DownloadIcon } from './icons';
+import { InfoIcon, XCircleIcon, SettingsIcon, DownloadIcon, ArrowLeftIcon, ArrowRightIcon } from './icons';
 
 // Add declaration for the gifshot library loaded from CDN
 declare var gifshot: any;
@@ -491,6 +491,16 @@ const AnimationPlayer: React.FC<AnimationPlayerProps> = ({ assets, onRegenerate,
     setSelectedFrameIndex(null); // Close modal after download
   };
 
+  const handlePreviousFrame = useCallback(() => {
+    if (selectedFrameIndex === null) return;
+    setSelectedFrameIndex(prev => (prev! - 1 + frames.length) % frames.length);
+  }, [selectedFrameIndex, frames.length]);
+
+  const handleNextFrame = useCallback(() => {
+    if (selectedFrameIndex === null) return;
+    setSelectedFrameIndex(prev => (prev! + 1) % frames.length);
+  }, [selectedFrameIndex, frames.length]);
+
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-4xl">
       <div 
@@ -567,13 +577,34 @@ const AnimationPlayer: React.FC<AnimationPlayerProps> = ({ assets, onRegenerate,
         )}
         {selectedFrameIndex !== null && frames[selectedFrameIndex] && (
           <div className="absolute inset-0 bg-black/80 z-40 flex items-center justify-center p-4 animate-fade-in" aria-modal="true" role="dialog" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-md flex flex-col items-center">
+              <div className="bg-gray-800 rounded-lg shadow-2xl p-6 w-full max-w-lg flex flex-col items-center">
                   <h3 className="text-xl font-bold mb-4 text-gray-100">Export Frame {selectedFrameIndex + 1}</h3>
-                  <img 
-                      src={frames[selectedFrameIndex].src} 
-                      alt={`Frame ${selectedFrameIndex + 1}`}
-                      className="rounded-md mb-6 w-64 h-64 object-contain bg-black"
-                  />
+                   <div className="flex items-center justify-center gap-4 mb-6 w-full">
+                    <button
+                        onClick={handlePreviousFrame}
+                        className="bg-gray-700/50 p-2 rounded-full text-white hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 focus-visible:ring-indigo-500 shrink-0"
+                        aria-label="Previous frame"
+                    >
+                        <ArrowLeftIcon className="w-6 h-6" />
+                    </button>
+                    <div className="relative w-64 h-64">
+                      <img 
+                          src={frames[selectedFrameIndex].src} 
+                          alt={`Frame ${selectedFrameIndex + 1}`}
+                          className="rounded-md w-full h-full object-contain bg-black"
+                      />
+                       <span className="absolute top-2 left-3 text-white text-2xl font-bold pointer-events-none" style={{ textShadow: '0 0 5px rgba(0,0,0,0.7)' }}>
+                        {selectedFrameIndex + 1}
+                      </span>
+                    </div>
+                    <button
+                        onClick={handleNextFrame}
+                        className="bg-gray-700/50 p-2 rounded-full text-white hover:bg-gray-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 focus-visible:ring-indigo-500 shrink-0"
+                        aria-label="Next frame"
+                    >
+                        <ArrowRightIcon className="w-6 h-6" />
+                    </button>
+                  </div>
                   <div className="flex items-center gap-4 w-full">
                       <button
                           onClick={() => setSelectedFrameIndex(null)}
